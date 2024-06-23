@@ -47,7 +47,7 @@ export class UserService {
             throw new InternalServerErrorException('An error occurred while creating the user');
         }
     }
-    @UseGuards(AuthGuard)
+
     async findAll(): Promise<Partial<User>[]> {
         try {
             const users = await this.userRepository
@@ -79,7 +79,7 @@ export class UserService {
         }
     }
 
-    @UseGuards(AuthGuard)
+
     async remove(id: number): Promise<void> {
         try {
             const result = await this.userRepository.delete(id);
@@ -96,7 +96,7 @@ export class UserService {
             throw new InternalServerErrorException('An error occurred while deleting the user');
         }
     }
-    @UseGuards(AuthGuard)
+
     async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
         try {
             const user = await this.userRepository.findOne({ where: { id } });

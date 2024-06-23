@@ -18,16 +18,18 @@ export class UserController {
     async create(@Body() createUserDto: CreateUserDto) {
         return this.userService.create(createUserDto);
     }
-
+    @UseGuards(AuthGuard)
     @Get('/get-user/:id')
     getUser(@Param('id', ParseIntPipe) id: number) {
         return this.userService.findOne(id);
     }
+    @UseGuards(AuthGuard)
     @Delete('/delete-user/:id')
     deleteUser(@Param('id', ParseIntPipe) id: number) {
         return this.userService.remove(id);
     }
 
+    @UseGuards(AuthGuard)
     @Patch('/update-user/:id')
     async updateUser(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto): Promise<User> {
         return this.userService.update(id, updateUserDto);
