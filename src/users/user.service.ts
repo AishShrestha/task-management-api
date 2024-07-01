@@ -1,13 +1,11 @@
 import { BadRequestException, Body, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt'
-import { LoginUserDto } from './dto/login-user.dto';
-import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from 'src/authentication/auth.guard';
+import { Role } from 'src/roles/role.entity';
 
 
 
@@ -16,6 +14,8 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(Role)
+        private roleRepository: Repository<Role>,
 
     ) { }
 
@@ -24,8 +24,16 @@ export class UserService {
             // Hash the password before creating the user entity
             const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-            // Replace the plain password with the hashed password
-            const userWithHashedPassword = { ...createUserDto, password: hashedPassword };
+            //  Retrieve roles using the provided role IDs
+            const roles = await this.roleRepository.find({
+                where: {
+                    id: In(createUserDto.roleIds),
+                }
+            })
+
+
+            // Replace the plain password with the hashed password  and set roles
+            const userWithHashedPassword = { ...createUserDto, password: hashedPassword, roles };
 
             // Create the user entity
             const user = this.userRepository.create(userWithHashedPassword);
@@ -38,6 +46,7 @@ export class UserService {
             return {
                 id: savedUser.id,
                 username: savedUser.username,
+
             };
         } catch (error) {
             // Log the error (optional)
@@ -50,11 +59,13 @@ export class UserService {
 
     async findAll(): Promise<Partial<User>[]> {
         try {
+            console.log(process.env.DB_HOST);
             const users = await this.userRepository
                 .createQueryBuilder('user')
                 .select(['user.id', 'user.username', 'user.email'])
                 .getMany();
             return users;
+
         } catch (error) {
             // Log the error for debugging purposes
             console.error('Error fetching users:', error);

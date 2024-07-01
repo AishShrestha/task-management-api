@@ -6,11 +6,14 @@ import { TaskModule } from './tasks/task.module';
 import { JwtModule } from '@nestjs/jwt';
 import { dataSourceOptions } from './typeorm.config';
 import { AuthModule } from './authentication/auth.module';
+import { RoleModule } from './roles/role.module';
+import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(dataSourceOptions),
+    ConfigModule.forRoot({ isGlobal: true }), // Load environment variables from .env file
+    TypeOrmModule.forRoot(dataSourceOptions), // Provide dataSourceOptions for TypeORM configuration
 
     JwtModule.register({
       secret: 'your-secret-key', // Use a strong secret key
@@ -18,7 +21,8 @@ import { AuthModule } from './authentication/auth.module';
     }),
     UserModule,
     TaskModule,
-    AuthModule
+    AuthModule,
+    RoleModule,
   ],
 })
 export class AppModule { }

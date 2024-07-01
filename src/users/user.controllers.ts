@@ -3,7 +3,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/authentication/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
+import { Roles } from 'src/decorator/roles.decorator';
+import { Role } from 'src/roles.enum';
+import { RolesGuard } from 'src/guard/roles.guard';
 
 @Controller('users')
 export class UserController {
@@ -24,6 +27,8 @@ export class UserController {
         return this.userService.findOne(id);
     }
     @UseGuards(AuthGuard)
+    @Roles(Role.Admin)
+    @UseGuards(RolesGuard)
     @Delete('/delete-user/:id')
     deleteUser(@Param('id', ParseIntPipe) id: number) {
         return this.userService.remove(id);
